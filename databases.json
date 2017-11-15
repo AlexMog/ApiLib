@@ -1,0 +1,10 @@
+{
+  "databases": {
+    "exampleDB": {
+      "driver": "com.mysql.jdbc.Driver",
+      "url": "jdbc:mysql://localhost:3306/example",
+      "user": "example",
+      "password": "exmaple"
+    }
+  }
+}
