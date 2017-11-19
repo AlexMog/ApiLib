@@ -12,7 +12,7 @@ import io.netty.buffer.ByteBuf;
 public class RabbitMQDecoder {
 	private final Map<Integer, Class<? extends Packet>> packets = new HashMap<>();
 	
-	public void RegisterPacket(int packetId, Class<? extends Packet> clazz) {
+	public void registerPacket(int packetId, Class<? extends Packet> clazz) {
 		packets.put(packetId, clazz);
 	}
 	
