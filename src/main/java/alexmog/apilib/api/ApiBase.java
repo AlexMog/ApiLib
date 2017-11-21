@@ -9,7 +9,6 @@ import java.util.logging.Level;
 
 import org.restlet.Restlet;
 import org.restlet.data.ChallengeScheme;
-import org.restlet.engine.application.CorsFilter;
 import org.restlet.ext.swagger.SwaggerApplication;
 import org.restlet.routing.Router;
 import org.restlet.security.Authorizer;
@@ -34,6 +33,11 @@ public abstract class ApiBase extends SwaggerApplication {
 		mGroups = groups;
 		mAuthorizer = authorizer;
 		mPublicAuthorizer = publicAuthorizer;
+        CorsService corsService = new CorsService();
+		corsService.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
+///		corsService.setAllowingAllRequestedHeaders(true);
+		corsService.setAllowedCredentials(true);
+		getServices().add(corsService);
 	}
 	
 	private Router generatePublicRouter() {
@@ -89,12 +93,6 @@ public abstract class ApiBase extends SwaggerApplication {
 	@Override
 	public final Restlet createInboundRoot() {
 		Router publicRouter = generatePublicRouter();
-		
-        CorsService corsService = new CorsService();
-		corsService.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
-		corsService.setAllowingAllRequestedHeaders(true);
-		corsService.setAllowedCredentials(true);
-		getServices().add(corsService);
         
         if (mVerifier != null) {
 	        ChallengeAuthenticator guard = null;
