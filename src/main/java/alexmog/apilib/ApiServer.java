@@ -3,7 +3,6 @@ package alexmog.apilib;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
-
 import alexmog.apilib.api.ApiBase;
 import alexmog.apilib.config.DatabasesConfig;
 import lombok.Data;

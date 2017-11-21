@@ -15,6 +15,7 @@ import org.restlet.routing.Router;
 import org.restlet.security.Authorizer;
 import org.restlet.security.ChallengeAuthenticator;
 import org.restlet.security.Verifier;
+import org.restlet.service.CorsService;
 
 import alexmog.apilib.ApiServer;
 
@@ -89,10 +90,11 @@ public abstract class ApiBase extends SwaggerApplication {
 	public final Restlet createInboundRoot() {
 		Router publicRouter = generatePublicRouter();
 		
-		CorsFilter corsFilter = new CorsFilter(getContext(), publicRouter);
-        corsFilter.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
-        corsFilter.setAllowingAllRequestedHeaders(true);
-        corsFilter.setAllowedCredentials(true);
+        CorsService corsService = new CorsService();
+		corsService.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
+		corsService.setAllowingAllRequestedHeaders(true);
+		corsService.setAllowedCredentials(true);
+		getServices().add(corsService);
         
         if (mVerifier != null) {
 	        ChallengeAuthenticator guard = null;
@@ -113,6 +115,6 @@ public abstract class ApiBase extends SwaggerApplication {
 			}
 	        mPubRouter.attachDefault(guard);
         }
-		return corsFilter;
+		return publicRouter;
 	}
 }
