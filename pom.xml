@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>alexmog</groupId>
   <artifactId>api-lib</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.7</version>
   
   <properties>
 		<restlet-version>2.3.10</restlet-version>
@@ -172,7 +172,7 @@
 					<configuration>
 						<source>1.7</source>
 						<target>1.7</target>
-						<compilerArgument></compilerArgument>
+						<compilerArgument />
 					</configuration>
 				</plugin>
 				<plugin>
@@ -180,13 +180,14 @@
 					<artifactId>jgitflow-maven-plugin</artifactId>
 					<version>1.0-m5.1</version>
 					<configuration>
+						<noDeploy>true</noDeploy>
 						<flowInitContext>
 						 <masterBranchName>master</masterBranchName>
 						 <developBranchName>develop</developBranchName>
 						 <featureBranchPrefix>feature/</featureBranchPrefix>
 						 <releaseBranchPrefix>release/</releaseBranchPrefix>
 						 <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
-						 <versionTagPrefix></versionTagPrefix>
+						 <versionTagPrefix />
 					    </flowInitContext>
 					</configuration>
 				</plugin>
