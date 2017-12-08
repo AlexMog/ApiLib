@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>alexmog</groupId>
   <artifactId>api-lib</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.8-SNAPSHOT</version>
   
   <properties>
 		<restlet-version>2.3.10</restlet-version>
@@ -172,7 +172,7 @@
 					<configuration>
 						<source>1.7</source>
 						<target>1.7</target>
-						<compilerArgument></compilerArgument>
+						<compilerArgument />
 					</configuration>
 				</plugin>
 				<plugin>
@@ -186,7 +186,7 @@
 						 <featureBranchPrefix>feature/</featureBranchPrefix>
 						 <releaseBranchPrefix>release/</releaseBranchPrefix>
 						 <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
-						 <versionTagPrefix></versionTagPrefix>
+						 <versionTagPrefix />
 					    </flowInitContext>
 					</configuration>
 				</plugin>
