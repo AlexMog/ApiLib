@@ -1,16 +1,16 @@
 package alexmog.apilib.dao;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.jolbox.bonecp.BoneCPDataSource;
-
-public abstract class DAO<T> {
-	protected BoneCPDataSource mDataSource;
+public abstract class DAO {
+	private DataSourceThreadLocal mDataSource;
 	
-	public DAO(BoneCPDataSource dataSource) {
+	public void setDataSource(DataSourceThreadLocal dataSource) {
 		mDataSource = dataSource;
 	}
 	
-	public abstract int insert(T data) throws SQLException;
-	public abstract T update(T data) throws SQLException;
+	public Connection getConnection() throws SQLException {
+		return mDataSource.getConnection();
+	}
 }

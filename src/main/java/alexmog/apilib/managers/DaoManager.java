@@ -7,9 +7,11 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.Properties;
 import java.util.Set;
 
@@ -17,48 +19,60 @@ import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import com.jolbox.bonecp.BoneCPDataSource;
 
-import alexmog.apilib.ApiServer;
+import alexmog.apilib.Server;
 import alexmog.apilib.config.DatabasesConfig;
 import alexmog.apilib.dao.DAO;
-import alexmog.apilib.managers.Managers.Manager;
+import alexmog.apilib.dao.DataSourceThreadLocal;
 
-@Manager
-public class DaoManager extends alexmog.apilib.managers.Manager {
-	private Map<String, BoneCPDataSource> mDataSources = new HashMap<>();
-	private Map<Class<?>, DAO<?>> mDaos = new HashMap<>();
+@alexmog.apilib.managers.Managers.Manager
+public class DaoManager extends Manager {
+	private Map<String, DataSourceThreadLocal> mDataSources = new HashMap<>();
+	private Map<Class<?>, DAO> mDaos = new HashMap<>();
 
 	@Override
 	public void shutdown() {
-		for (BoneCPDataSource ds : mDataSources.values()) ds.close();
+		for (DataSourceThreadLocal ds : mDataSources.values()) ds.close();
+	}
+	
+	public void releaseConnectionsForThisThread() {
+		for (DataSourceThreadLocal dataSource : mDataSources.values()) {
+			try {
+				dataSource.releaseConnection();
+			} catch (SQLException e) {
+				Server.LOGGER.log(Level.SEVERE, "Error while releasing connection", e);
+			}
+		}
 	}
 	
 	private void initDaos() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		ApiServer.LOGGER.info("Searching for Daos using annotations...");
-		Reflections reflections = new Reflections(".*");
+		Server.LOGGER.info("Searching for Daos using annotations...");
+		Reflections reflections = new Reflections("com.unexpectedstudio.*");
 		
 		Set<Class<?>> classSet = reflections.getTypesAnnotatedWith(Dao.class);
 
 		for (Class<?> c : classSet) {
-			ApiServer.LOGGER.info("Found Dao: " + c.getName() + "...");
-			BoneCPDataSource dataSource = mDataSources.get(c.getAnnotation(Dao.class).database());
-			if (dataSource == null) {
-				ApiServer.LOGGER.warning("DataSource not found '" + c.getAnnotation(Dao.class).database() + "' for DAO '" + c.getName() + "'");
+			Server.LOGGER.info("Found Dao: " + c.getName() + "...");
+			DataSourceThreadLocal dataSourceThreadLocal = mDataSources.get(c.getAnnotation(Dao.class).database());
+			if (dataSourceThreadLocal == null) {
+				Server.LOGGER.warning("DataSource not found '" + c.getAnnotation(Dao.class).database() + "' for DAO '" + c.getName() + "'");
 				continue;
 			}
-			mDaos.put(c, (DAO<?>) c.getConstructor(BoneCPDataSource.class).newInstance(dataSource));
-			ApiServer.LOGGER.info("Dao added successfully.");
+			DAO dao = (DAO) c.getConstructor().newInstance();
+			dao.setDataSource(dataSourceThreadLocal);
+			mDaos.put(c, dao);
+			Server.LOGGER.info("Dao added successfully.");
 		}
-		ApiServer.LOGGER.info("Dao init done.");
+		Server.LOGGER.info("Dao init done.");
 	}
 	
 	private void injectDaos() throws IllegalAccessException, DaoNotFoundException {
-		ApiServer.LOGGER.info("Injecting Daos...");
-		Reflections reflections = new Reflections(".*", new FieldAnnotationsScanner());
+		Server.LOGGER.info("Injecting Daos...");
+		Reflections reflections = new Reflections("com.unexpectedstudio.*", new FieldAnnotationsScanner());
 		Set<Field> fieldsSet = reflections.getFieldsAnnotatedWith(DaoInject.class);
 		for (Field f : fieldsSet) {
-			ApiServer.LOGGER.info("Injecting field " + f + "...");
+			Server.LOGGER.info("Injecting field " + f + "...");
 			if (!Modifier.isStatic(f.getModifiers())) throw new IllegalAccessException("Field '" + f + "' is not static.");
-			DAO<?> dao = mDaos.get(f.getType());
+			DAO dao = mDaos.get(f.getType());
 			if (dao == null) {
 				if (!f.getAnnotation(DaoInject.class).needed()) continue;
 				throw new DaoNotFoundException(f.getType().toGenericString());
@@ -66,15 +80,15 @@ public class DaoManager extends alexmog.apilib.managers.Manager {
 			f.setAccessible(true);
 			f.set(null, dao);
 		}
-		ApiServer.LOGGER.info("Injection done.");
+		Server.LOGGER.info("Injection done.");
 	}
 	
 	private void initDatabases(Properties config, DatabasesConfig dbsConfig) throws Exception {
 		for (Entry<String, DatabasesConfig.Database> entry : dbsConfig.databases.entrySet()) {
-			ApiServer.LOGGER.info("Adding dataSource '" + entry.getKey() + "'...");
+			Server.LOGGER.info("Adding dataSource '" + entry.getKey() + "'...");
 			DatabasesConfig.Database db = entry.getValue();
 			BoneCPDataSource dataSource = new BoneCPDataSource();
-			dataSource.setDriverClass("com.mysql.jdbc.Driver");
+			dataSource.setDriverClass(db.driver);
 			dataSource.setJdbcUrl(db.url);
 			dataSource.setUsername(db.user);
 			dataSource.setPassword(db.password);
@@ -89,10 +103,10 @@ public class DaoManager extends alexmog.apilib.managers.Manager {
 			dataSource.setConnectionTestStatement(config.getProperty("bonecp.connectionTestStatement", "SELECT 1"));
 			dataSource.setLazyInit(Boolean.parseBoolean(config.getProperty("bonecp.lazyInit", "true")));
 
-			ApiServer.LOGGER.info("Testing database '" + entry.getKey() + "' connection...");
+			Server.LOGGER.info("Testing database '" + entry.getKey() + "' connection...");
 			dataSource.getConnection().close();
-			ApiServer.LOGGER.info("Done.");
-			mDataSources.put(entry.getKey(), dataSource);
+			Server.LOGGER.info("Done.");
+			mDataSources.put(entry.getKey(), new DataSourceThreadLocal(dataSource));
 		}
 	}
 
