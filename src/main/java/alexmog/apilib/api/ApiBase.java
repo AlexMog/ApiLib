@@ -37,7 +37,7 @@ public abstract class ApiBase extends SwaggerApplication {
 		corsService.setAllowedOrigins(new HashSet<String>(Arrays.asList("*")));
 ///		corsService.setAllowingAllRequestedHeaders(true);
 		corsService.setAllowedCredentials(true);
-		corsService.setSkippingResourceForCorsOptions(true);
+//		corsService.setSkippingResourceForCorsOptions(true);
 		getServices().add(corsService);
 	}
 	
