@@ -5,7 +5,7 @@
   <version>0.6.0</version>
   
   <properties>
-		<restlet-version>2.3.10</restlet-version>
+		<restlet-version>[2.3.12,)</restlet-version>
 	</properties>
 
 	<dependencies>
@@ -139,9 +139,9 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
 		<dependency>
-		    <groupId>com.rabbitmq</groupId>
-		    <artifactId>amqp-client</artifactId>
-		    <version>4.1.0</version>
+		  <groupId>com.rabbitmq</groupId>
+		  <artifactId>amqp-client</artifactId>
+		  <version>[4.8.0,)</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/io.netty/netty-buffer -->
 		<dependency>
