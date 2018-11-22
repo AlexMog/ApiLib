@@ -46,7 +46,7 @@ public class DaoManager extends Manager {
 	
 	private void initDaos() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Server.LOGGER.info("Searching for Daos using annotations...");
-		Reflections reflections = new Reflections("com.unexpectedstudio.*");
+		Reflections reflections = new Reflections(".*");
 		
 		Set<Class<?>> classSet = reflections.getTypesAnnotatedWith(Dao.class);
 
@@ -67,7 +67,7 @@ public class DaoManager extends Manager {
 	
 	private void injectDaos() throws IllegalAccessException, DaoNotFoundException {
 		Server.LOGGER.info("Injecting Daos...");
-		Reflections reflections = new Reflections("com.unexpectedstudio.*", new FieldAnnotationsScanner());
+		Reflections reflections = new Reflections(".*", new FieldAnnotationsScanner());
 		Set<Field> fieldsSet = reflections.getFieldsAnnotatedWith(DaoInject.class);
 		for (Field f : fieldsSet) {
 			Server.LOGGER.info("Injecting field " + f + "...");
