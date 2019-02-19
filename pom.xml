@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>alexmog</groupId>
   <artifactId>api-lib</artifactId>
-  <version>0.6.2</version>
+  <version>0.6.4</version>
   
   <properties>
-		<restlet-version>[2.3.12,)</restlet-version>
+		<restlet-version>2.4.1</restlet-version>
 	</properties>
 
 	<dependencies>
