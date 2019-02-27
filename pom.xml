@@ -29,8 +29,14 @@
 			<artifactId>org.restlet.ext.jaxrs</artifactId>
 			<version>${restlet-version}</version>
 		</dependency>
-		<!-- documentation of the API -->
+		
 		<dependency>
+		    <groupId>org.flywaydb</groupId>
+		    <artifactId>flyway-core</artifactId>
+		    <version>5.2.4</version>
+		</dependency>
+		<!-- documentation of the API -->
+<!--		<dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet.ext.swagger</artifactId>
 			<version>${restlet-version}</version>
@@ -41,7 +47,7 @@
 				</exclusion>
 			</exclusions>
 
-		</dependency><!--
+		</dependency>
 		<dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet.ext.apispark</artifactId>
