@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.data.ChallengeScheme;
-import org.restlet.ext.swagger.SwaggerApplication;
 import org.restlet.routing.Router;
 import org.restlet.security.Authorizer;
 import org.restlet.security.ChallengeAuthenticator;
@@ -18,7 +18,7 @@ import org.restlet.service.CorsService;
 
 import alexmog.apilib.ApiServer;
 
-public abstract class ApiBase extends SwaggerApplication {
+public abstract class ApiBase extends Application {
 	private Verifier mVerifier;
 	private Class<? extends Authorizer> mAuthorizer;
 	private Authorizer mPublicAuthorizer;

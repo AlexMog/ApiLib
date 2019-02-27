@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.Properties;
 import java.util.Set;
 
+import org.flywaydb.core.Flyway;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import com.jolbox.bonecp.BoneCPDataSource;
@@ -105,6 +106,19 @@ public class DaoManager extends Manager {
 
 			Server.LOGGER.info("Testing database '" + entry.getKey() + "' connection...");
 			dataSource.getConnection().close();
+			Server.LOGGER.info("Applying DB migrations... (migration files location: \"classpath:db/" + entry.getKey() + "/sql\"");
+			int retrys = 3;
+			do {
+				try {
+					Flyway flyway = Flyway.configure().dataSource(dataSource).baselineOnMigrate(true).locations("classpath:db/" + entry.getKey() + "/sql").load();
+					flyway.migrate();
+					break;
+				} catch (Exception e) {
+					if (retrys <= 0) throw e;
+					retrys--;
+					Thread.sleep(500);
+				}
+			} while (true);
 			Server.LOGGER.info("Done.");
 			mDataSources.put(entry.getKey(), new DataSourceThreadLocal(dataSource));
 		}

@@ -2,13 +2,18 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>alexmog</groupId>
   <artifactId>api-lib</artifactId>
-  <version>0.6.2</version>
+  <version>0.6.4</version>
   
   <properties>
-		<restlet-version>[2.3.12,)</restlet-version>
+		<restlet-version>2.4.1</restlet-version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+		    <groupId>org.flywaydb</groupId>
+		    <artifactId>flyway-core</artifactId>
+		    <version>5.2.4</version>
+		</dependency>
 		<dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet</artifactId>
@@ -29,14 +34,8 @@
 			<artifactId>org.restlet.ext.jaxrs</artifactId>
 			<version>${restlet-version}</version>
 		</dependency>
-		
-		<dependency>
-		    <groupId>org.flywaydb</groupId>
-		    <artifactId>flyway-core</artifactId>
-		    <version>5.2.4</version>
-		</dependency>
 		<!-- documentation of the API -->
-<!--		<dependency>
+		<dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet.ext.swagger</artifactId>
 			<version>${restlet-version}</version>
@@ -47,7 +46,7 @@
 				</exclusion>
 			</exclusions>
 
-		</dependency>
+		</dependency><!--
 		<dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet.ext.apispark</artifactId>
