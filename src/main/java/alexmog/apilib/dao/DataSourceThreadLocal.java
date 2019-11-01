@@ -4,13 +4,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-import com.jolbox.bonecp.BoneCPDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class DataSourceThreadLocal {
-	private final BoneCPDataSource mDataSource;
+	private final HikariDataSource mDataSource;
 	private final ThreadLocal<Connection> mThreadLocal;
 	
-	public DataSourceThreadLocal(BoneCPDataSource dataSource) {
+	public DataSourceThreadLocal(HikariDataSource dataSource) {
 		mDataSource = dataSource;
 		mThreadLocal = new ThreadLocal<>();
 		ThreadLocal.withInitial(new Supplier<Connection>() {

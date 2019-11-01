@@ -1,5 +1,6 @@
 package alexmog.apilib.managers;
 
+import java.io.File;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -18,7 +19,9 @@ import java.util.Set;
 import org.flywaydb.core.Flyway;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
-import com.jolbox.bonecp.BoneCPDataSource;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import alexmog.apilib.Server;
 import alexmog.apilib.config.DatabasesConfig;
@@ -85,44 +88,39 @@ public class DaoManager extends Manager {
 	}
 	
 	private void initDatabases(Properties config, DatabasesConfig dbsConfig) throws Exception {
-		for (Entry<String, DatabasesConfig.Database> entry : dbsConfig.databases.entrySet()) {
-			Server.LOGGER.info("Adding dataSource '" + entry.getKey() + "'...");
-			DatabasesConfig.Database db = entry.getValue();
-			BoneCPDataSource dataSource = new BoneCPDataSource();
-			dataSource.setDriverClass(db.driver);
-			dataSource.setJdbcUrl(db.url);
-			dataSource.setUsername(db.user);
-			dataSource.setPassword(db.password);
-			dataSource.setIdleConnectionTestPeriodInMinutes(Integer.parseInt(config.getProperty("bonecp.idleConnectionTestPeriodInMinutes", "1")));
-			dataSource.setIdleMaxAgeInMinutes(Integer.parseInt(config.getProperty("bonecp.idleMaxAgeInMinutes", "4")));
-			dataSource.setMaxConnectionsPerPartition(Integer.parseInt(config.getProperty("bonecp.maxConnectionsPerPartition", "60")));
-			dataSource.setMinConnectionsPerPartition(Integer.parseInt(config.getProperty("bonecp.minConnectionsPerPartition", "1")));
-			dataSource.setPoolAvailabilityThreshold(Integer.parseInt(config.getProperty("bonecp.poolAvailabilityThreshold", "10")));
-			dataSource.setPartitionCount(Integer.parseInt(config.getProperty("bonecp.partitionCount", "4")));
-			dataSource.setAcquireIncrement(Integer.parseInt(config.getProperty("bonecp.acquireIncrement", "5")));
-			dataSource.setStatementsCacheSize(Integer.parseInt(config.getProperty("bonecp.statementsCacheSize", "50")));
-			dataSource.setConnectionTestStatement(config.getProperty("bonecp.connectionTestStatement", "SELECT 1"));
-			dataSource.setLazyInit(Boolean.parseBoolean(config.getProperty("bonecp.lazyInit", "true")));
-			dataSource.setConnectionTimeoutInMs(Integer.parseInt(config.getProperty("bonecp.connectionTimeoutInMs", "5000")));
+		File databaseConfigFiles = new File("databases");
+        if (databaseConfigFiles.exists() && databaseConfigFiles.isDirectory()
+            && databaseConfigFiles.listFiles().length > 0) {
+        	Server.LOGGER.info("Databases enabled, initializing DataSources...");
+            for (File f : databaseConfigFiles.listFiles((f) -> f.getName().endsWith(".properties"))) {
+                String dbName = f.getName().substring(0, f.getName().lastIndexOf("."));
 
-			Server.LOGGER.info("Testing database '" + entry.getKey() + "' connection...");
-			dataSource.getConnection().close();
-			Server.LOGGER.info("Applying DB migrations... (migration files location: \"classpath:db/" + entry.getKey() + "/sql\"");
-			int retrys = 3;
-			do {
-				try {
-					Flyway flyway = Flyway.configure().dataSource(dataSource).baselineOnMigrate(true).locations("classpath:db/" + entry.getKey() + "/sql").load();
-					flyway.migrate();
-					break;
-				} catch (Exception e) {
-					if (retrys <= 0) throw e;
-					retrys--;
-					Thread.sleep(500);
-				}
-			} while (true);
-			Server.LOGGER.info("Done.");
-			mDataSources.put(entry.getKey(), new DataSourceThreadLocal(dataSource));
-		}
+                Server.LOGGER.info("Adding dataSource '" + dbName + "'...");
+
+                HikariConfig cfg = new HikariConfig(f.getAbsolutePath());
+                cfg.addDataSourceProperty("allowMultiQueries", "true"); // TODO: Improve me
+                HikariDataSource dataSource = new HikariDataSource(cfg);
+                Server.LOGGER.info("Testing database '" + dbName + "' connection...");
+                dataSource.getConnection().close();
+                Server.LOGGER.info("Done.");
+    			Server.LOGGER.info("Applying DB migrations... (migration files location: \"classpath:db/" + dbName + "/sql\"");
+    			int retrys = 3;
+    			do {
+    				try {
+    					Flyway flyway = Flyway.configure().dataSource(dataSource).baselineOnMigrate(true).locations("classpath:db/" + dbName + "/sql").load();
+    					flyway.migrate();
+    					break;
+    				} catch (Exception e) {
+    					if (retrys <= 0) throw e;
+    					retrys--;
+    					Thread.sleep(500);
+    				}
+    			} while (true);
+    			Server.LOGGER.info("Done.");
+                mDataSources.put(dbName, new DataSourceThreadLocal(dataSource));
+            }
+        } else
+            Server.LOGGER.warning("No databases config set. This can be problematic.");
 	}
 
 	@Override
