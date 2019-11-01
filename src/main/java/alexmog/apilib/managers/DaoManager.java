@@ -103,7 +103,7 @@ public class DaoManager extends Manager {
 			dataSource.setStatementsCacheSize(Integer.parseInt(config.getProperty("bonecp.statementsCacheSize", "50")));
 			dataSource.setConnectionTestStatement(config.getProperty("bonecp.connectionTestStatement", "SELECT 1"));
 			dataSource.setLazyInit(Boolean.parseBoolean(config.getProperty("bonecp.lazyInit", "true")));
-			dataSource.setConnectionTimeoutInMs(Integer.parseInt("bonecp.connectionTimeoutInMs", "5000"));
+			dataSource.setConnectionTimeoutInMs(Integer.parseInt(config.getProperty("bonecp.connectionTimeoutInMs", "5000")));
 
 			Server.LOGGER.info("Testing database '" + entry.getKey() + "' connection...");
 			dataSource.getConnection().close();
