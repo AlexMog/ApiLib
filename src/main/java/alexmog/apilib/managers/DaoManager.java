@@ -100,7 +100,7 @@ public class DaoManager extends Manager {
                 HikariConfig cfg = new HikariConfig(f.getAbsolutePath());
                 cfg.addDataSourceProperty("allowMultiQueries", "true"); // TODO: Improve me
                 HikariDataSource dataSource = new HikariDataSource(cfg);
-                Server.LOGGER.info("Testing database '" + dbName + "' connection...");
+                Server.LOGGER.info("Testing database '" + dbName + "' (" + cfg.getJdbcUrl() + ") connection...");
                 dataSource.getConnection().close();
                 Server.LOGGER.info("Done.");
     			Server.LOGGER.info("Applying DB migrations... (migration files location: \"classpath:db/" + dbName + "/sql\"");
