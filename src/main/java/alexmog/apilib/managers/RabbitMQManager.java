@@ -56,6 +56,7 @@ public class RabbitMQManager extends alexmog.apilib.managers.Manager {
 
 	public void basicPublish(String exchange, String routingKey, BasicProperties properties, Packet packet) {
 		try {
+			if (mChannel == null) return;
 			mChannel.basicPublish(exchange, routingKey, properties, RabbitMQEncoder.encode(packet));
 		} catch (IOException e) {
 			Server.LOGGER.log(Level.WARNING, "Cannot publish on rabbitMQ", e);
